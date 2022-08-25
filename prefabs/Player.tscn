@@ -1,31 +1,15 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://sprites/dog.jpg" type="Texture" id=1]
 [ext_resource path="res://scripts/PlayerController.cs" type="Script" id=2]
-[ext_resource path="res://sprites/arrow.png" type="Texture" id=3]
-[ext_resource path="res://prefabs/Grapple.cs" type="Script" id=4]
-
-[sub_resource type="CircleShape2D" id=2]
+[ext_resource path="res://prefabs/Grapple.tscn" type="PackedScene" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 25.0
 
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 2 )
-
-[node name="Grapple" type="RigidBody2D" parent="."]
-gravity_scale = 0.0
-script = ExtResource( 4 )
-
-[node name="Sprite" type="Sprite" parent="Grapple"]
-scale = Vector2( 0.013, -0.017 )
-z_index = 1
-texture = ExtResource( 3 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Grapple"]
-position = Vector2( 0, 5 )
-shape = SubResource( 2 )
-disabled = true
+grapple = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="."]
 scale = Vector2( 0.0449387, 0.0504087 )
