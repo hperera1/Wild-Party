@@ -2,15 +2,15 @@ using Godot;
 using Godot.Collections;
 
 public class PlayerController : KinematicBody2D {
-    [Export] public PackedScene grapple;
+    [Export] public PackedScene grapple; // instancing grapple
+	Grapple current_grapple;
     public enum PlayerState { Idle, Walking, Grappling };
 	const int walk_speed = 200;
     const int grapple_force = 600;
 	Vector2 velocity;
-    // Grapple grapple;
 
 	public override void _Ready() {
-		// grapple = GetNode<Grapple>("Grapple");
+		
 	}
 
 	public override void _PhysicsProcess(float delta) {        
@@ -35,9 +35,9 @@ public class PlayerController : KinematicBody2D {
 		}
 
         if(Input.IsActionJustPressed("grapple_shoot")) {
-			GD.Print("shoot grapple");
             Grapple new_grapple = (Grapple) grapple.Instance();
-			GetNode("/root").AddChild(new_grapple);
+			current_grapple = new_grapple;
+			GetNode("/root/GameNode").AddChild(new_grapple);
 
             var world_space = GetWorld2d().DirectSpaceState;
 		    Vector2 mouse_position = GetGlobalMousePosition();
