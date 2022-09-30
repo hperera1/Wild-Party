@@ -2,12 +2,14 @@ using Godot;
 using System;
 
 public class Grapple : RigidBody2D {
+    GameController game_controller;
     CollisionShape2D collider;
     Vector2 hooked_position;
     bool hooked = false;
     float grapple_timeout = 0;
 
     public override void _Ready() {
+        game_controller = GetNode<GameController>("/root/GameNode");
         collider = GetNode<CollisionShape2D>("GrappleShape");
     }
 
@@ -52,13 +54,11 @@ public class Grapple : RigidBody2D {
             hooked_position = entered_node.Position;
             collider.SetDeferred("disabled", true);
             
-            // draw line from player to hooked object
-            Line2D player_to_object = new Line2D();
-            Vector2 player_position = GetNode<Node2D>("/root/GameNode/Player").Position;
-            player_to_object.AddPoint(player_position, 0);
-            player_to_object.AddPoint(hooked_position, 1);
-            player_to_object.Width = 1;
-            GetNode("/root/GameNode").AddChild(player_to_object);
+            // draw rope from player to hooked object
+            Node2D player = GetNode<Node2D>("/root/GameNode/Player");
+            Rope grapple_rope = new Rope(player, hooked_position);
+            GetNode("/root/GameNode").AddChild(grapple_rope);
+            game_controller.GrappleConnected();
         }
     }
 }
