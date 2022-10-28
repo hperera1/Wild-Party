@@ -8,17 +8,21 @@ public class PlayerController : KinematicBody2D {
     public enum PlayerState { Idle, Walking, Grappling };
 	PlayerState current_state = PlayerState.Walking;
 	const int walking_speed = 200;
-	const int grappling_speed = 200;
+	const int grappling_speed = 3;
     const int grapple_force = 600;
-	int grapple_length;
+	float delta_sum = 0.0f;
 	Vector2 velocity;
+
+	// initial constant grapple variables
+	double grapple_radius = 0;
+	double starting_angle = 99999;
 
 	public override void _Ready() {
 		
 	}
 
 	// TODO: set walking and grappling inputs to do different things
-	public override void _PhysicsProcess(float delta) {      
+	public override void _PhysicsProcess(float delta) {     
 		if(current_state == PlayerState.Walking)  {
 			if(Input.IsActionPressed("ui_left")) {
 				velocity.x = -walking_speed;
@@ -44,13 +48,13 @@ public class PlayerController : KinematicBody2D {
 		// when grappling, e & q should handle clockwise and counter clockwise movement respectively
 		if(current_state == PlayerState.Grappling) {
 			if(Input.IsActionPressed("grapple_clockwise")) {
-				velocity = CalculateRotation() * 2;
+				CalculatePosition(delta);
 			}
 			else if(Input.IsActionPressed("grapple_counter_clockwise")) {
 				
 			}
 			else {
-				velocity = Vector2.Zero;
+				
 			}
 		}
 
@@ -67,15 +71,32 @@ public class PlayerController : KinematicBody2D {
 		MoveAndSlide(velocity, new Vector2(0, -1));
 	}
 
-	// (-y, x)
-	Vector2 CalculateRotation() {
-		Vector2 rotation_vector = new Vector2();
-		double y_coordinate = Position.y - current_grapple.Position.y;
-        double x_coordinate = Position.x - current_grapple.Position.x;
-		rotation_vector.x = (float) (-y_coordinate);
-		rotation_vector.y = (float) (x_coordinate);
+	void CalculatePosition(float delta) {
+		delta_sum += delta; 
+		if(starting_angle == 99999) {
+			CalculateStartingAngle();
+		}
 
-		return rotation_vector;
+		Position = new Vector2(
+			(float) Math.Sin(grappling_speed * delta_sum - starting_angle) * (float) grapple_radius, 
+			(float) Math.Cos(grappling_speed * delta_sum - starting_angle) * (float) grapple_radius
+		) + current_grapple.Position;
+	}
+
+	void CalculateStartingAngle() {
+		double radius_squared_doubled = 2 * Math.Pow(grapple_radius, 2);
+		Vector2 player_pos = Position;
+		Vector2 rotation_pos = new Vector2(
+			(float) (Math.Sin(0) * grapple_radius), 
+			(float) (Math.Cos(0) * grapple_radius)
+		) + current_grapple.Position;
+		
+		float pos_distance = player_pos.DistanceSquaredTo(rotation_pos);
+		starting_angle = Math.Acos((radius_squared_doubled - pos_distance) / radius_squared_doubled);
+	}
+
+	public void SetStartingValues() {
+		grapple_radius = Position.DistanceTo(current_grapple.Position);
 	}
 
 	public void SetStateGrappling() {

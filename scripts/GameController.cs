@@ -10,5 +10,6 @@ public class GameController : Node2D {
 
     public void GrappleConnected() {
         player.SetStateGrappling();
+        player.SetStartingValues();
     }
 }
