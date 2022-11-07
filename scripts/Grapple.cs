@@ -27,29 +27,35 @@ public class Grapple : RigidBody2D {
         }
     }
 
-    // 1. add collision checking
-    // 2. hold grapple on pivot point and draw line from player to grapple
-    // 3. apply angular momentum to player
-
-    // make sure to delete the grapple after a certain amount of time or some other condition
     public void ShootGrapple(int force, Vector2 player_coordinates, Vector2 mouse_coordinates) {
         GlobalPosition = player_coordinates;
         double y_coordinate = mouse_coordinates.y - player_coordinates.y;
         double x_coordinate = mouse_coordinates.x - player_coordinates.x;
         double angle = Math.Atan(y_coordinate / x_coordinate);
+        
         float y_velocity = (float) (force * Math.Sin(angle));
         float x_velocity = (float) (force * Math.Cos(angle));
+        double y_displacement = Math.Sin(angle) * 40;
+        double x_displacement = Math.Cos(angle) * 40;
 
+        // flip velocity and position displacement if on the left side of player
         if(mouse_coordinates.x < player_coordinates.x) {
             x_velocity *= -1;
             y_velocity *= -1;
+            x_displacement *= -1;
+            y_displacement *= -1;
         }
 
+        Vector2 grapple_pos = Position;
+        grapple_pos.x += (float) x_displacement;
+        grapple_pos.y += (float) y_displacement;
+        Position = grapple_pos;
         LinearVelocity = (new Vector2(x_velocity, y_velocity));
     }
 
     void GrappleEnteredObstacle(PhysicsBody2D entered_node) {
         if(entered_node is RigidBody2D) {
+            game_controller.GrappleConnected();
             hooked = true;
             hooked_position = entered_node.Position;
             collider.SetDeferred("disabled", true);
@@ -58,7 +64,6 @@ public class Grapple : RigidBody2D {
             Node2D player = GetNode<Node2D>("/root/GameNode/Player");
             Rope grapple_rope = new Rope(player, hooked_position);
             GetNode("/root/GameNode").AddChild(grapple_rope);
-            game_controller.GrappleConnected();
         }
     }
 }

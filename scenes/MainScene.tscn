@@ -11,5 +11,5 @@ script = ExtResource( 3 )
 position = Vector2( 187, 144 )
 
 [node name="ObstacleNode" parent="." instance=ExtResource( 2 )]
-position = Vector2( 410, 235 )
+position = Vector2( 517, 291 )
 contact_monitor = false

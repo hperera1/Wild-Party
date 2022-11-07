@@ -15,7 +15,7 @@ public class PlayerController : KinematicBody2D {
 
 	// initial constant grapple variables
 	double grapple_radius = 0;
-	double starting_angle = 99999;
+	double starting_angle = 999999;
 
 	public override void _Ready() {
 		
@@ -24,14 +24,13 @@ public class PlayerController : KinematicBody2D {
 	// TODO: set walking and grappling inputs to do different things
 	public override void _PhysicsProcess(float delta) {     
 		if(current_state == PlayerState.Walking)  {
+			velocity = Vector2.Zero;
+
 			if(Input.IsActionPressed("ui_left")) {
 				velocity.x = -walking_speed;
 			}
 			else if(Input.IsActionPressed("ui_right")) {
 				velocity.x = walking_speed;
-			}
-			else {
-				velocity.x = 0;
 			}
 
 			if(Input.IsActionPressed("ui_up")) {
@@ -40,9 +39,8 @@ public class PlayerController : KinematicBody2D {
 			else if(Input.IsActionPressed("ui_down")) {
 				velocity.y = walking_speed;
 			}
-			else {
-				velocity.y = 0;
-			}
+
+			MoveAndSlide(velocity, new Vector2(0, -1));
 		}
 
 		// when grappling, e & q should handle clockwise and counter clockwise movement respectively
@@ -67,13 +65,11 @@ public class PlayerController : KinematicBody2D {
 		    Vector2 mouse_position = GetGlobalMousePosition();
             new_grapple.ShootGrapple(grapple_force, GlobalPosition, mouse_position);
         }
-
-		MoveAndSlide(velocity, new Vector2(0, -1));
 	}
 
 	void CalculatePosition(float delta) {
 		delta_sum += delta; 
-		if(starting_angle == 99999) {
+		if(starting_angle == 999999) {
 			CalculateStartingAngle();
 		}
 
@@ -92,7 +88,15 @@ public class PlayerController : KinematicBody2D {
 		) + current_grapple.Position;
 		
 		float pos_distance = player_pos.DistanceSquaredTo(rotation_pos);
-		starting_angle = Math.Acos((radius_squared_doubled - pos_distance) / radius_squared_doubled);
+		double distance_calculation = (radius_squared_doubled - pos_distance) / radius_squared_doubled;
+		if(distance_calculation < -1) {
+			distance_calculation = -2 - distance_calculation;
+		}
+
+		starting_angle = Math.Acos(distance_calculation);
+		if(player_pos.x > rotation_pos.x) {
+			starting_angle *= -1;
+		}
 	}
 
 	public void SetStartingValues() {
